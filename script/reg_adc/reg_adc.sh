@@ -4,7 +4,7 @@
 pathToBin='../../bin/./reg_adc';
 
 # Define the path to the data
-pathData='/work/le2i/gu5306le/prostate/experiments/';
+pathData='/data/prostate/experiments/';
 # Define the path to the T2W GT
 pathT2WGT='/GT_inv/prostate'
 # Define the path to the ADC GT
@@ -32,7 +32,8 @@ for patient in $pathData*/; do
     : > $script_filename
     printf "$pathToBin \"$pathData$patient_folder$pathT2WGT\" \"$pathData$patient_folder$pathADCGT\" \"$pathData$patient_folder$pathADC\" \"$pathData$patient_folder$pathADCSave\"" >> $script_filename
     chmod u+x $script_filename
-    qsub -q batch -pe smp 8 $script_filename
+    /bin/bash $script_filename
+    #qsub -q batch -pe smp 8 $script_filename
     
     ((patient_idx++))
     
