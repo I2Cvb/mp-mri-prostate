@@ -68,7 +68,7 @@ The following normalization routines were applied:
 
 #### Run the pipeline
 
-To normalize the DCE MRI data, launch an `ipython` or `python` prompt and run from the root directory:
+To normalize data, launch an `ipython` or `python` prompt and run from the root directory:
 
 ```python
 >> run pipeline/feature-normalization/pipeline_normalization_rician_t2w_patient.py
@@ -79,3 +79,18 @@ To normalize the DCE MRI data, launch an `ipython` or `python` prompt and run fr
 >> run pipeline/feature-normalization/pipeline_normalization_dce_patient.py
 ```
 
+### Extraction pipeline
+
+The following extraction routines were applied:
+
+- Extract the intensity signal from T2W and ADC,
+- Extract the enhancement signal from the DCE,
+
+#### Run the pipeline
+
+To extract the different feature, launch an `ipython` or `python` prompt and run from the root directory:
+
+```python
+>> run pipeline/feature-extraction/t2w/pipeline_extraction_intensity_t2w.py
+>> run pipeline/feature-extraction/t2w/pipeline_extraction_edge_t2w.py
+```
