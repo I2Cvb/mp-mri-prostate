@@ -12,7 +12,7 @@ from protoclass.data_management import GTModality
 from protoclass.preprocessing import RicianNormalization
 from protoclass.preprocessing import GaussianNormalization
 
-from protoclass.extraction import HaralickExtraction
+from protoclass.extraction import PhaseCongruencyExtraction
 
 # Define the path where all the patients are
 path_patients = '/data/prostate/experiments'
@@ -27,7 +27,7 @@ path_gaussian = '/data/prostate/pre-processing/mp-mri-prostate/gaussian-t2w'
 # Define the path where the information for the rician normalization are
 path_rician = '/data/prostate/pre-processing/mp-mri-prostate/rician-t2w'
 # Define the path to store the Tofts data
-path_store = '/data/prostate/extraction/mp-mri-prostate/harlick-t2w'
+path_store = '/data/prostate/extraction/mp-mri-prostate/phase-congruency-t2w'
 
 # ID of the patient for which we need to use the Gaussian Normalization
 ID_GAUSSIAN = '387'
@@ -96,16 +96,15 @@ for id_p, (p_t2w, p_gt) in enumerate(zip(path_patients_list_t2w,
     t2w_mod.update_histogram()
 
     # Create the Haralick extractor
-    nb_gray_level = 8
-    har_ext = HaralickExtraction(t2w_mod, levels=nb_gray_level)
+    pc_ext = PhaseCongruencyExtraction(t2w_mod, 'monogenic')
 
     # Fit the data
     print 'The Haralick statistics'
-    har_ext.fit(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
+    pc_ext.fit(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
 
     # Extract the data
     print 'Extract the edge map'
-    data = har_ext.transform(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
+    data = pc_ext.transform(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
 
     # Store the data
     print 'Store the data in the right directory'
@@ -114,6 +113,6 @@ for id_p, (p_t2w, p_gt) in enumerate(zip(path_patients_list_t2w,
     if not os.path.exists(path_store):
         os.makedirs(path_store)
     pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
-               '_haralick_t2w.npy')
+               '_phase_congruency_t2w.npy')
     filename = os.path.join(path_store, pat_chg)
     np.save(filename, data)
