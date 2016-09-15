@@ -15,7 +15,7 @@ from protoclass.preprocessing import PiecewiseLinearNormalization
 # Define the path where all the patients are
 path_patients = '/data/prostate/experiments'
 # Define the path of the modality to normalize
-path_adc = 'ADC'
+path_adc = 'ADC_reg_bspline'
 # Define the path of the ground for the prostate
 path_gt = 'GT_inv/prostate'
 # Define the label of the ground-truth which will be provided

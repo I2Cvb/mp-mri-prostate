@@ -93,4 +93,8 @@ To extract the different feature, launch an `ipython` or `python` prompt and run
 ```python
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_intensity_t2w.py
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_edge_t2w.py
+>> run pipeline/feature-extraction/t2w/pipeline_extraction_haralick-t2w.py
+>> run pipeline/feature-extraction/adc/pipeline_extraction_intensity_adc.py
+>> run pipeline/feature-extraction/adc/pipeline_extraction_edge_adc.py
+>> run pipeline/feature-extraction/adc/pipeline_extraction_haralick-adc.py
 ```
