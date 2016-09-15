@@ -36,9 +36,7 @@ ID_GAUSSIAN = '387'
 EXTREM = (-4.48, 22.11)
 
 # Set the value of the edges
-TYPE_FILTER = ('sobel', 'prewitt', 'kirsch')
-# Order of the filter
-ORDER_FILTER = ('1st', '2nd')
+TYPE_FILTER = ('sobel', 'prewitt', 'scharr', 'kirsch', 'laplacian')
 
 # Generate the different path to be later treated
 path_patients_list_t2w = []
@@ -102,32 +100,29 @@ for id_p, (p_t2w, p_gt) in enumerate(zip(path_patients_list_t2w,
 
     # Extract the edges for each type of filter and order of filter
     for type_f in TYPE_FILTER:
-        for order_f in ORDER_FILTER:
+        print 'The {} will be extracted'.format(type_f)
 
-            print 'The {} {} will be extracted'.format(order_f, type_f)
+        # Create the extraction method
+        ext = EdgeSignalExtraction(t2w_mod, edge_detector=type_f)
 
-            # Create the extraction method
-            ext = EdgeSignalExtraction(t2w_mod, edge_detector=type_f,
-                                       n_derivative=order_f)
+        # Fit the data
+        print 'Compute the edge map'
+        ext.fit(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
 
-            # Fit the data
-            print 'Compute the edge map'
-            ext.fit(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
+        # Extract the data
+        print 'Extract the edge map'
+        data = ext.transform(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
 
-            # Extract the data
-            print 'Extract the edge map'
-            data = ext.transform(t2w_mod, ground_truth=gt_mod, cat=label_gt[0])
+        # Store the data
+        print 'Store the data in the right directory'
 
-            # Store the data
-            print 'Store the data in the right directory'
+        # Create the path for the current version of the filter
+        path_filter = os.path.join(path_store, type_f)
 
-            # Create the path for the current version of the filter
-            path_filter = os.path.join(path_store, type_f + '-' + order_f)
-
-            # Check that the path is existing
-            if not os.path.exists(path_filter):
-                os.makedirs(path_filter)
-                pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
-                           '_edge_t2w.npy')
-                filename = os.path.join(path_filter, pat_chg)
-                np.save(filename, data)
+        # Check that the path is existing
+        if not os.path.exists(path_filter):
+            os.makedirs(path_filter)
+            pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
+                       '_edge_t2w.npy')
+            filename = os.path.join(path_filter, pat_chg)
+            np.save(filename, data)
