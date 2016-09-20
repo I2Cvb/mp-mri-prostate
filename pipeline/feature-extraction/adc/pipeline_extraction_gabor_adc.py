@@ -67,14 +67,13 @@ for id_p, (p_adc, p_gt) in enumerate(zip(path_patients_list_adc,
 
     # Create the different parameters for the filter bank
     frequencies = np.linspace(0.05, 0.25, num=4, endpoint=True)
-    alphas = np.linspace(0., np.pi, num=3, endpoint=True)
-    betas = np.linspace(0., np.pi, num=3, endpoint=True)
-    gammas = np.linspace(0., 2. * np.pi, num=6, endpoint=True)
+    alphas = np.linspace(0., np.pi, num=4, endpoint=True)
+    gammas = np.linspace(0., 2. * np.pi, num=8, endpoint=True)
     # We have less resolution in z
     scale_sigmas = np.array([1., 1., 2.])
     # Create the Gabor extractor
     gab_ext = GaborBankExtraction(adc_mod, frequencies=frequencies,
-                                  alphas=alphas, betas=betas, gammas=gammas,
+                                  alphas=alphas, gammas=gammas,
                                   scale_sigmas=scale_sigmas)
 
     # Fit the data
