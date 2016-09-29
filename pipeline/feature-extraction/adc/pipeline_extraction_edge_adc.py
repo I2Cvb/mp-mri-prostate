@@ -23,7 +23,7 @@ label_gt = ['prostate']
 # Define the path where the information for the piecewise-linear normalization
 path_piecewise = '/data/prostate/pre-processing/mp-mri-prostate/piecewise-linear-adc'
 # Define the path to store the Tofts data
-path_store = '/data/prostate/extraction/mp-mri-prostate'
+path_store = '/data/prostate/extraction/mp-mri-prostate/edge-adc'
 
 # Set the value of the edges
 TYPE_FILTER = ('sobel', 'prewitt', 'scharr', 'kirsch', 'laplacian')
@@ -91,7 +91,7 @@ for id_p, (p_adc, p_gt) in enumerate(zip(path_patients_list_adc,
         # Check that the path is existing
         if not os.path.exists(path_filter):
             os.makedirs(path_filter)
-            pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
-                       '_edge_adc.npy')
-            filename = os.path.join(path_filter, pat_chg)
-            np.save(filename, data)
+        pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
+                   '_edge_adc.npy')
+        filename = os.path.join(path_filter, pat_chg)
+        np.save(filename, data)

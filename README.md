@@ -83,20 +83,46 @@ To normalize data, launch an `ipython` or `python` prompt and run from the root 
 
 The following extraction routines were applied:
 
-- Extract the intensity signal from T2W and ADC,
-- Extract the enhancement signal from the DCE,
+TODO
 
 #### Run the pipeline
 
 To extract the different feature, launch an `ipython` or `python` prompt and run from the root directory:
+
+##### T2W
 
 ```python
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_intensity_t2w.py
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_edge_t2w.py
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_haralick_t2w.py
 >> run pipeline/feature-extraction/t2w/pipeline_extraction_phase_congruency_t2w.py
+>> run pipeline/feature-extraction/t2w/pipeline_extraction_dct_t2w.py
+>> run pipeline/feature-extraction/t2w/pipeline_extraction_gabor_t2w.py
+```
+
+##### ADC
+
+```python
 >> run pipeline/feature-extraction/adc/pipeline_extraction_intensity_adc.py
 >> run pipeline/feature-extraction/adc/pipeline_extraction_edge_adc.py
 >> run pipeline/feature-extraction/adc/pipeline_extraction_haralick_adc.py
 >> run pipeline/feature-extraction/adc/pipeline_extraction_phase_congruency_adc.py
+>> run pipeline/feature-extraction/adc/pipeline_extraction_dct_adc.py
+>> run pipeline/feature-extraction/adc/pipeline_extraction_gabor_adc.py
+```
+
+##### Spatial
+
+```python
+>> run pipeline/feature-extraction/spatial/pipeline_extraction_distance_center.py
+>> run pipeline/feature-extraction/spatial/pipeline_extraction_distance_contour.py
+>> run pipeline/feature-extraction/spatial/pipeline_extraction_position_cylindrical.py
+>> run pipeline/feature-extraction/spatial/pipeline_extraction_position_euclidean.py
+```
+
+##### MRSI
+
+```python
+>> run pipeline/feature-extraction/mrsi/pipeline_extraction_mrsi_signal.py
+>> run pipeline/feature-extraction/mrsi/pipeline_extraction_relative_quantification.py
 ```

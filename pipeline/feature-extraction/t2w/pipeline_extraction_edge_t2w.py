@@ -27,7 +27,7 @@ path_gaussian = '/data/prostate/pre-processing/mp-mri-prostate/gaussian-t2w'
 # Define the path where the information for the rician normalization are
 path_rician = '/data/prostate/pre-processing/mp-mri-prostate/rician-t2w'
 # Define the path to store the Tofts data
-path_store = '/data/prostate/extraction/mp-mri-prostate'
+path_store = '/data/prostate/extraction/mp-mri-prostate/edge-t2w'
 
 # ID of the patient for which we need to use the Gaussian Normalization
 ID_GAUSSIAN = '387'
@@ -122,7 +122,7 @@ for id_p, (p_t2w, p_gt) in enumerate(zip(path_patients_list_t2w,
         # Check that the path is existing
         if not os.path.exists(path_filter):
             os.makedirs(path_filter)
-            pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
-                       '_edge_t2w.npy')
-            filename = os.path.join(path_filter, pat_chg)
-            np.save(filename, data)
+        pat_chg = (id_patient_list[id_p].lower().replace(' ', '_') +
+                   '_edge_t2w.npy')
+        filename = os.path.join(path_filter, pat_chg)
+        np.save(filename, data)
