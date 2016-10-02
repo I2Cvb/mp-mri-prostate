@@ -18,9 +18,9 @@ path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
 t2w_features = ['dct-t2w', 'edge-t2w/kirsch', 'edge-t2w/laplacian',
                 'edge-t2w/prewitt', 'edge-t2w/scharr', 'edge-t2w/sobel',
-                'gabor-t2w', 'harlick-t2w', 'ise-t2w', 'phase-congruency-t2w',
-                'spatial-position-euclidean', 'spatial-dist-center',
-                'spatial-dist-contour']
+                'gabor-t2w', 'harlick-t2w', 'ise-t2w', 'phase-congruency-t2w']#,
+#                'spatial-position-euclidean', 'spatial-dist-center',
+#                'spatial-dist-contour']
 # Define the extension of each features
 ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_edge_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
@@ -117,7 +117,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     result_cv.append([pred_prob, crf.classes_])
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-1-bis/t2w'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-1/t2w'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(result_cv, os.path.join(path_store,

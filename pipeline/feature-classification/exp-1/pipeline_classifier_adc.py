@@ -18,9 +18,9 @@ path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
 adc_features = ['dct-adc', 'edge-adc/kirsch', 'edge-adc/laplacian',
                 'edge-adc/prewitt', 'edge-adc/scharr', 'edge-adc/sobel',
-                'gabor-adc', 'harlick-adc', 'ise-adc', 'phase-congruency-adc',
-                'spatial-position-euclidean', 'spatial-dist-center',
-                'spatial-dist-contour']
+                'gabor-adc', 'harlick-adc', 'ise-adc', 'phase-congruency-adc']#,
+#                'spatial-position-euclidean', 'spatial-dist-center',
+#                'spatial-dist-contour']
 # Define the extension of each features
 ext_features = ['_dct_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
                 '_edge_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
@@ -117,7 +117,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     result_cv.append([pred_prob, crf.classes_])
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-1-bis/adc'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-1/adc'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(result_cv, os.path.join(path_store,

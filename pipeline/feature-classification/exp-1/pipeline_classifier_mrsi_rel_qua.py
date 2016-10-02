@@ -109,7 +109,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     result_cv.append([pred_prob, crf.classes_])
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-1-bis/mrsi-qua'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-qua'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(result_cv, os.path.join(path_store,
