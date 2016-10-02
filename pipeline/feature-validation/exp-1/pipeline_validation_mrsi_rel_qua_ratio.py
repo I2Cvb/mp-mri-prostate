@@ -73,7 +73,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     testing_label_cv.append(testing_label)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-1-bis/mrsi-qua/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-qua/results.pkl'
 results = joblib.load(fresults)
 
 # # Initialise a list for the sensitivity and specificity
@@ -131,6 +131,6 @@ handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-1-bis/mrsi_rel_qua_ratio.pdf',
+plt.savefig('results/exp-1/mrsi_rel_qua_ratio.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')
