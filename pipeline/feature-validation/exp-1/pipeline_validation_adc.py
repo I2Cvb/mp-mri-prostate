@@ -1,5 +1,5 @@
 """
-This pipeline is used to report the results for the T2W modality.
+This pipeline is used to report the results for the ADC modality.
 """
 
 import os
@@ -73,7 +73,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     testing_label_cv.append(testing_label)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-1-bis/t2w/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1-bis/adc/results.pkl'
 results = joblib.load(fresults)
 
 # # Initialise a list for the sensitivity and specificity
@@ -113,7 +113,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 ax.plot(mean_fpr, avg_tpr,
-        label=r'T2W - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+        label=r'ADC - AUC $= {:1.3f} \pm {:1.3f}$'.format(
             auc(mean_fpr, avg_tpr), np.std(auc_pat)),
         lw=2)
 ax.fill_between(mean_fpr,
@@ -131,6 +131,6 @@ handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-1-bis/t2w.pdf',
+plt.savefig('results/exp-1-bis/adc.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')
