@@ -25,8 +25,8 @@ t2w_features = ['dct-t2w', 'edge-t2w/kirsch', 'edge-t2w/laplacian',
 ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_edge_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_gabor_t2w.npy', '_haralick_t2w.npy', '_ise_t2w.npy',
-                '_phase_congruency_t2w.npy', '_spe.npy', '_spe.npy',
-                '_spe.npy']
+                '_phase_congruency_t2w.npy']#, '_spe.npy', '_spe.npy',
+#                '_spe.npy']
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided
