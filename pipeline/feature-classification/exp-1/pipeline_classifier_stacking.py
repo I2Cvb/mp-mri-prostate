@@ -7,7 +7,9 @@ import numpy as np
 
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
+
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 from protoclass.data_management import GTModality
 
@@ -201,32 +203,98 @@ for idx_lopo_cv in range(len(id_patient_list)):
     print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
 
     # We will need a training and a validation set for the meta-classifier
-    
+    # Create a vector with all the patients
+    idx_patient = range(len(id_patient_list))
+    idx_patient.remove(idx_lopo_cv)
+    idx_patient = np.roll(idx_patient, idx_lopo_cv)
+    # We will use the 60 percent as training and 40 percent as validation
+    idx_split = int(0.6 * (len(id_patient_list) - 1))
+    idx_patient_training = idx_patient[:idx_split]
+    idx_patient_validation = idx_patient[idx_split:]
 
+    # Create an empty list for the ensemble of RF
+    rf_ensemble = []
 
-    # Get the testing data
-    testing_data = data[idx_lopo_cv]
-    testing_label = label_binarize(label[idx_lopo_cv], [0, 255])
-    print 'Create the testing set ...'
-
-    # Create the training data and label
-    training_data = [arr for idx_arr, arr in enumerate(data)
-                     if idx_arr != idx_lopo_cv]
+    # Get the label
     training_label = [arr for idx_arr, arr in enumerate(label)
-                     if idx_arr != idx_lopo_cv]
-    # Concatenate the data
-    training_data = np.vstack(training_data)
-    training_label = label_binarize(np.hstack(training_label).astype(int),
-                                    [0, 255])
-    print 'Create the training set ...'
+                      if idx_arr in idx_patient_training]
+    training_label = np.ravel(label_binarize(
+        np.hstack(training_label).astype(int), [0, 255]))
 
-    # Perform the classification for the current cv and the
-    # given configuration
-    crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    pred_prob = crf.fit(training_data, np.ravel(training_label)).predict_proba(
-        testing_data)
+    # We need to build the training and train each random forest
+    for mod_data in range(len(data) - 1):
+        # Get the training data
+        # Create the training data and label
+        training_data_mod = [arr for idx_arr, arr in enumerate(data[mod_data])
+                             if idx_arr in idx_patient_training]
+        # Get the spatial information
+        training_data_spa = [arr for idx_arr, arr in enumerate(data[-1])
+                             if idx_arr in idx_patient_training]
+        # Concatenate the data
+        training_data_mod = np.vstack(training_data_mod)
+        training_data_spa = np.vstack(training_data_spa)
+        # Concatenate spatial information and modality information
+        training_data = np.hstack((training_data_mod, training_data_spa))
 
-    result_cv.append([pred_prob, crf.classes_])
+        # Create the current RF
+        crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+        crf.fit(training_data, training_label)
+        # Add the classifier
+        rf_ensemble.append(crf)
+
+    # Get the labels
+    validation_label = [arr for idx_arr, arr in enumerate(label)
+                        if idx_arr in idx_patient_validation]
+    validation_label = np.ravel(label_binarize(
+        np.hstack(validation_label).astype(int), [0, 255]))
+    # We need to create the meta classifier
+    rf_data_answer = []
+    for mod_data in range(len(data) - 1):
+        # Create the validation data and label
+        validation_data_mod = [arr for idx_arr, arr
+                               in enumerate(data[mod_data])
+                               if idx_arr in idx_patient_validation]
+        # Get the spatial information
+        validation_data_spa = [arr for idx_arr, arr in enumerate(data[-1])
+                               if idx_arr in idx_patient_validation]
+        # Concatenate the data
+        validation_data_mod = np.vstack(validation_data_mod)
+        validation_data_spa = np.vstack(validation_data_spa)
+        # Concatenate spatial information and modality information
+        validation_data = np.hstack((validation_data_mod, validation_data_spa))
+
+        # Get the validation through the already trained forest
+        pred_proba = rf_ensemble[mod_data].predict_proba(validation_data)
+        # Select only the column corresponding to the positive class
+        pos_class_arg = np.ravel(np.argwhere(
+            rf_ensemble[mod_data].classes_ == 1))[0]
+        rf_data_answer.append(pred_proba[:, pos_class_arg])
+
+    # For know we will train a classifier using the previous probability
+    # extracted
+    rf_data_answer = np.vstack(rf_data_answer).T
+
+    # Create the meta-classifier
+    cgb = GradientBoostingClassifier()
+    cgb.fit(rf_data_answer, validation_label)
+
+    testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
+    # Go for the testing now
+    testing_inter = []
+    for mod_data in range(len(data) - 1):
+        testing_data = data[mod_data][idx_lopo_cv]
+
+        # Get the probability of the first layer
+        pred_proba = rf_ensemble[mod_data].predict_proba(testing_data)
+        # Select only the column corresponding to the positive class
+        pos_class_arg = np.ravel(np.argwhere(
+            rf_ensemble[mod_data].classes_ == 1))[0]
+        testing_inter.append(pred_proba[:, pos_class_arg])
+
+    # Make the classification with the second layer
+    testing_inter = np.vstack(testing_inter).T
+    pred_prob = cgb.predict_proba(testing_inter)
+    result_cv.append([pred_prob, cgb.classes_])
 
 # Save the information
 path_store = '/data/prostate/results/mp-mri-prostate/exp-1/stacking'
