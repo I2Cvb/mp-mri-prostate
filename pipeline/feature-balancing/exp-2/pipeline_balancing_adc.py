@@ -21,13 +21,15 @@ path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
 adc_features = ['dct-adc', 'edge-adc/kirsch', 'edge-adc/laplacian',
                 'edge-adc/prewitt', 'edge-adc/scharr', 'edge-adc/sobel',
-                'gabor-adc', 'harlick-adc', 'ise-adc', 'phase-congruency-adc']#,
+                'gabor-adc', 'harlick-adc', 'ise-adc', 'lbp-adc', 'lbp-adc',
+                'phase-congruency-adc']#,
 #                'spatial-position-euclidean', 'spatial-dist-center',
 #                'spatial-dist-contour']
 # Define the extension of each features
 ext_features = ['_dct_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
                 '_edge_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
                 '_gabor_adc.npy', '_haralick_adc.npy', '_ise_adc.npy',
+                '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
                 '_phase_congruency_adc.npy']#, '_spe.npy', '_spe.npy',
 #                 '_spe.npy']
 # Define the path of the ground for the prostate

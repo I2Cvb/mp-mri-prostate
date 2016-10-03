@@ -39,6 +39,8 @@ path_patients_list_gt = []
 # Create the generator
 id_patient_list = [name for name in os.listdir(path_patients)
                    if os.path.isdir(os.path.join(path_patients, name))]
+# Sort the list of patient
+id_patient_list = sorted(id_patient_list)
 
 for id_patient in id_patient_list:
     # Append for the GT data - Note that we need a list of gt path

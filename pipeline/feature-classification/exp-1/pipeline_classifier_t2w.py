@@ -26,7 +26,7 @@ t2w_features = ['dct-t2w', 'edge-t2w/kirsch', 'edge-t2w/laplacian',
 ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_edge_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_gabor_t2w.npy', '_haralick_t2w.npy', '_ise_t2w.npy',
-                '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
+                '_lbp_8_1_t2w.npy', '_lbp_16_2_t2w.npy',
                 '_phase_congruency_t2w.npy']#, '_spe.npy', '_spe.npy',
 #                '_spe.npy']
 # Define the path of the ground for the prostate
@@ -39,6 +39,8 @@ path_patients_list_gt = []
 # Create the generator
 id_patient_list = [name for name in os.listdir(path_patients)
                    if os.path.isdir(os.path.join(path_patients, name))]
+# Sort the list of patient
+id_patient_list = sorted(id_patient_list)
 
 for id_patient in id_patient_list:
     # Append for the GT data - Note that we need a list of gt path
