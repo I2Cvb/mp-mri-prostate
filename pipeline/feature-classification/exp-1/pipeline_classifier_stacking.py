@@ -109,7 +109,7 @@ for idx_pat in range(len(id_patient_list)):
         patient_data_t2w.append(single_feature_data)
 
     # Concatenate the data
-    patient_data_t2w = np.concatenate(patient_data_t2w, axis=0)
+    patient_data_t2w = np.concatenate(patient_data_t2w, axis=1)
     data_t2w.append(patient_data_t2w)
 
     # Read the ADC information
@@ -127,7 +127,7 @@ for idx_pat in range(len(id_patient_list)):
         patient_data_adc.append(single_feature_data)
 
     # Concatenate the data
-    patient_data_adc = np.concatenate(patient_data_adc, axis=0)
+    patient_data_adc = np.concatenate(patient_data_adc, axis=1)
     data_adc.append(patient_data_adc)
 
     # Read the MRSI information
@@ -145,7 +145,7 @@ for idx_pat in range(len(id_patient_list)):
         patient_data_mrsi.append(single_feature_data)
 
     # Concatenate the data
-    patient_data_mrsi = np.concatenate(patient_data_mrsi, axis=0)
+    patient_data_mrsi = np.concatenate(patient_data_mrsi, axis=1)
     data_mrsi.append(patient_data_mrsi)
 
     # Read the DCE information
@@ -163,7 +163,7 @@ for idx_pat in range(len(id_patient_list)):
         patient_data_dce.append(single_feature_data)
 
     # Concatenate the data
-    patient_data_dce = np.concatenate(patient_data_dce, axis=0)
+    patient_data_dce = np.concatenate(patient_data_dce, axis=1)
     data_dce.append(patient_data_dce)
 
     # Read the SPATIAL information
@@ -183,7 +183,7 @@ for idx_pat in range(len(id_patient_list)):
     # Add the information about the pz
     patient_data_spatial.append(np.atleast_2d(gt_pz).T)
     # Concatenate the data
-    patient_data_spatial = np.concatenate(patient_data_spatial, axis=0)
+    patient_data_spatial = np.concatenate(patient_data_spatial, axis=1)
     data_spatial.append(patient_data_spatial)
 
     # Extract the corresponding ground-truth for the testing data
@@ -282,7 +282,9 @@ for idx_lopo_cv in range(len(id_patient_list)):
     # Go for the testing now
     testing_inter = []
     for mod_data in range(len(data) - 1):
-        testing_data = data[mod_data][idx_lopo_cv]
+        testing_data_mod = data[mod_data][idx_lopo_cv]
+        testing_data_spa = data[-1][idx_lopo_cv]
+        testing_data = np.hstack((testing_data_mod, testing_data_spa))
 
         # Get the probability of the first layer
         pred_proba = rf_ensemble[mod_data].predict_proba(testing_data)
