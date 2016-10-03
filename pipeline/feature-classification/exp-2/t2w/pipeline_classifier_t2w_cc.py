@@ -27,6 +27,11 @@ ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_gabor_t2w.npy', '_haralick_t2w.npy', '_ise_t2w.npy',
                 '_phase_congruency_t2w.npy', '_spe.npy', '_spe.npy',
                 '_spe.npy']
+# Define the path of the balanced data
+path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2'
+sub_folder = ['cc', 'iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
+              'smote-b1', 'smote-b2', 'ros']
+ext_balanced = '_t2w.npz'
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided

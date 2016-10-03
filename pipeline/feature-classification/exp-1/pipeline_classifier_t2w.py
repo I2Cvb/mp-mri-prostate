@@ -18,13 +18,15 @@ path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
 t2w_features = ['dct-t2w', 'edge-t2w/kirsch', 'edge-t2w/laplacian',
                 'edge-t2w/prewitt', 'edge-t2w/scharr', 'edge-t2w/sobel',
-                'gabor-t2w', 'harlick-t2w', 'ise-t2w', 'phase-congruency-t2w']#,
+                'gabor-t2w', 'harlick-t2w', 'ise-t2w', 'lbp-t2w', 'lbp-t2w',
+                'phase-congruency-t2w']#,
 #                'spatial-position-euclidean', 'spatial-dist-center',
 #                'spatial-dist-contour']
 # Define the extension of each features
 ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_edge_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_gabor_t2w.npy', '_haralick_t2w.npy', '_ise_t2w.npy',
+                '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
                 '_phase_congruency_t2w.npy']#, '_spe.npy', '_spe.npy',
 #                '_spe.npy']
 # Define the path of the ground for the prostate
