@@ -37,13 +37,12 @@ samplers = [under_sampling.InstanceHardnessThreshold(
             under_sampling.NearMiss(version=2, n_jobs=N_JOBS),
             under_sampling.NearMiss(version=3, n_jobs=N_JOBS),
             under_sampling.RandomUnderSampler(),
-            over_sampling.ADASYN(n_jobs=N_JOBS),
             over_sampling.SMOTE(kind='regular', n_jobs=N_JOBS),
             over_sampling.SMOTE(kind='borderline1', n_jobs=N_JOBS),
             over_sampling.SMOTE(kind='borderline2', n_jobs=N_JOBS),
             over_sampling.RandomOverSampler()]
 # Define the sub-folder to use
-sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
+sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'smote',
               'smote-b1', 'smote-b2', 'ros']
 
 # Generate the different path to be later treated
