@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
 
-from sklearn.decompsition import FastICA
+from sklearn.decomposition import FastICA
 
 from sklearn.ensemble import RandomForestClassifier
 

@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
 
-from sklearn.decompsition import PCA
+from sklearn.decomposition import PCA
 
 from sklearn.ensemble import RandomForestClassifier
 
