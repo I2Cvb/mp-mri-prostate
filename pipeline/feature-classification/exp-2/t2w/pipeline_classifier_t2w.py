@@ -31,7 +31,7 @@ ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
 #                '_spe.npy']
 # Define the path of the balanced data
 path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2'
-sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
+sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'smote',
               'smote-b1', 'smote-b2', 'ros']
 ext_balanced = '_t2w.npz'
 # Define the path of the ground for the prostate

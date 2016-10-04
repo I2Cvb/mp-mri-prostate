@@ -1,4 +1,4 @@
-"""This pipeline is intended to make the classification of ADC modality
+"""This pipeline is intended to make the classification of DCE modality
 features."""
 from __future__ import division
 
@@ -16,24 +16,17 @@ path_patients = '/data/prostate/experiments'
 # Define the path where the features have been extracted
 path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
-adc_features = ['dct-adc', 'edge-adc/kirsch', 'edge-adc/laplacian',
-                'edge-adc/prewitt', 'edge-adc/scharr', 'edge-adc/sobel',
-                'gabor-adc', 'harlick-adc', 'ise-adc', 'lbp-adc', 'lbp-adc',
-                'phase-congruency-adc']#,
+dce_features = ['ese-dce']#,
 #                'spatial-position-euclidean', 'spatial-dist-center',
 #                'spatial-dist-contour']
 # Define the extension of each features
-ext_features = ['_dct_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
-                '_edge_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
-                '_gabor_adc.npy', '_haralick_adc.npy', '_ise_adc.npy',
-                '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
-                '_phase_congruency_adc.npy']#, '_spe.npy', '_spe.npy',
+ext_features = ['_ese__dce.npy']#, '_spe.npy', '_spe.npy',
 #                '_spe.npy']
 # Define the path of the balanced data
 path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2'
 sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'smote',
               'smote-b1', 'smote-b2', 'ros']
-ext_balanced = '_adc.npz'
+ext_balanced = '_dce.npz'
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided
@@ -63,11 +56,11 @@ for idx_pat in range(len(id_patient_list)):
 
     # For each patient we nee to load the different feature
     patient_data = []
-    for idx_feat in range(len(adc_features)):
+    for idx_feat in range(len(dce_features)):
         # Create the path to the patient file
         filename_feature = (id_patient_list[idx_pat].lower().replace(' ', '_') +
                             ext_features[idx_feat])
-        path_data = os.path.join(path_features, adc_features[idx_feat],
+        path_data = os.path.join(path_features, dce_features[idx_feat],
                                  filename_feature)
         single_feature_data = np.load(path_data)
         # Check if this is only one dimension data
@@ -86,7 +79,7 @@ for idx_pat in range(len(id_patient_list)):
     for idx_imb in range(len(sub_folder)):
         path_bal = os.path.join(path_balanced, sub_folder[idx_imb])
         pat_chg = (id_patient_list[idx_pat].lower().replace(' ', '_') +
-               '_adc.npz')
+               '_dce.npz')
         filename = os.path.join(path_bal, pat_chg)
         npz_file = np.load(filename)
         data_bal_meth.append(npz_file['data_resampled'])
@@ -151,7 +144,7 @@ for idx_imb in range(len(sub_folder)):
     results_bal.append(result_cv)
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-2/adc'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-2/dce'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(results_bal, os.path.join(path_store,
