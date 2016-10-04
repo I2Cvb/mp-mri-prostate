@@ -1,12 +1,9 @@
-"""This pipeline is intended to make the classification of ADC modality
-features."""
+"""This pipeline is intended to make the classification of MRSI relative
+quantification modality features."""
 from __future__ import division
 
 import os
 import numpy as np
-
-from imblearn import under_sampling
-from imblearn import over_sampling
 
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
@@ -19,45 +16,31 @@ path_patients = '/data/prostate/experiments'
 # Define the path where the features have been extracted
 path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
-mrsi_features = ['mrsi-spectra']
+mrsi_features = ['mrsi-rel-qua-integral']
 # Define the extension of each features
-ext_features = ['_spectra_mrsi.npy']
+ext_features = ['_rq_mrsi.npy']
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided
 label_gt = ['prostate', 'pz', 'cg', 'cap']
-# Define the path where to store the data
-path_store = '/data/prostate/balanced/mp-mri-prostate/exp-2'
-
-N_JOBS = -1
-# Create the under_samplers and over_samplers list to use
-samplers = [under_sampling.InstanceHardnessThreshold(
-                n_jobs=N_JOBS, estimator='random-forest'),
-            under_sampling.NearMiss(version=1, n_jobs=N_JOBS),
-            under_sampling.NearMiss(version=2, n_jobs=N_JOBS),
-            under_sampling.NearMiss(version=3, n_jobs=N_JOBS),
-            under_sampling.RandomUnderSampler(),
-            over_sampling.ADASYN(n_jobs=N_JOBS),
-            over_sampling.SMOTE(kind='regular', n_jobs=N_JOBS),
-            over_sampling.SMOTE(kind='borderline1', n_jobs=N_JOBS),
-            over_sampling.SMOTE(kind='borderline2', n_jobs=N_JOBS),
-            over_sampling.RandomOverSampler()]
-# Define the sub-folder to use
-sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
-              'smote-b1', 'smote-b2', 'ros']
 
 # Generate the different path to be later treated
 path_patients_list_gt = []
 # Create the generator
 id_patient_list = [name for name in os.listdir(path_patients)
                    if os.path.isdir(os.path.join(path_patients, name))]
+# Sort the list of patient
+id_patient_list = sorted(id_patient_list)
 
 for id_patient in id_patient_list:
     # Append for the GT data - Note that we need a list of gt path
     path_patients_list_gt.append([os.path.join(path_patients, id_patient, gt)
                                   for gt in path_gt])
 
-# Load the data and apply the balancing
+# Load all the data once. Splitting into training and testing will be done at
+# the cross-validation time
+data = []
+label = []
 for idx_pat in range(len(id_patient_list)):
     print 'Read patient {}'.format(id_patient_list[idx_pat])
 
@@ -78,7 +61,7 @@ for idx_pat in range(len(id_patient_list)):
     # Concatenate the data in a single array
     patient_data = np.concatenate(patient_data, axis=1)
 
-    print 'The patient data are loaded'
+    print 'Read the MRSI data for the current patient ...'
 
     # Create the corresponding ground-truth
     gt_mod = GTModality()
@@ -87,30 +70,50 @@ for idx_pat in range(len(id_patient_list)):
     print 'Read the GT data for the current patient ...'
 
     # Concatenate the training data
-    data = patient_data
+    data.append(patient_data)
     # Extract the corresponding ground-truth for the testing data
     # Get the index corresponding to the ground-truth
     roi_prostate = gt_mod.extract_gt_data('prostate', output_type='index')
     # Get the label of the gt only for the prostate ROI
     gt_cap = gt_mod.extract_gt_data('cap', output_type='data')
-    label = gt_cap[roi_prostate]
+    label.append(gt_cap[roi_prostate])
+    print 'Data and label extracted for the current patient ...'
 
-    print 'Let s go for the different imbalancing methods'
+result_cv = []
+# Go for LOPO cross-validation
+for idx_lopo_cv in range(len(id_patient_list)):
 
-    for idx_s, imb_method in enumerate(samplers):
+    # Display some information about the LOPO-CV
+    print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
 
-        print 'Apply balancing {} over {}'.format(idx_s + 1, len(samplers))
+    # Get the testing data
+    testing_data = data[idx_lopo_cv]
+    testing_label = label_binarize(label[idx_lopo_cv], [0, 255])
+    print 'Create the testing set ...'
 
-        # Make the fitting and sampling
-        data_resampled, label_resampled = imb_method.fit_sample(data, label)
+    # Create the training data and label
+    training_data = [arr for idx_arr, arr in enumerate(data)
+                     if idx_arr != idx_lopo_cv]
+    training_label = [arr for idx_arr, arr in enumerate(label)
+                     if idx_arr != idx_lopo_cv]
+    # Concatenate the data
+    training_data = np.vstack(training_data)
+    training_label = label_binarize(np.hstack(training_label).astype(int),
+                                    [0, 255])
+    print 'Create the training set ...'
 
-        # Store the resampled data
-        path_bal = os.path.join(path_store, sub_folder[idx_s])
-        if not os.path.exists(path_bal):
-            os.makedirs(path_bal)
-        pat_chg = (id_patient_list[idx_pat].lower().replace(' ', '_') +
-               '_mrsi.npz')
-        filename = os.path.join(path_bal, pat_chg)
-        np.savez(filename, data_resampled=data_resampled,
-                 label_resampled=label_resampled)
-        print 'Store the data'
+    # Perform the classification for the current cv and the
+    # given configuration
+    crf = RandomForestClassifier(n_estimators=100, max_features=None,
+                                 n_jobs=-1)
+    pred_prob = crf.fit(training_data, np.ravel(training_label)).predict_proba(
+        testing_data)
+
+    result_cv.append([pred_prob, crf.classes_])
+
+# Save the information
+path_store = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-qua-int'
+if not os.path.exists(path_store):
+    os.makedirs(path_store)
+joblib.dump(result_cv, os.path.join(path_store,
+                                    'results.pkl'))

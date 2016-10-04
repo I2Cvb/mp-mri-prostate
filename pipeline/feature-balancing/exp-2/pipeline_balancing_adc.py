@@ -22,16 +22,13 @@ path_features = '/data/prostate/extraction/mp-mri-prostate'
 adc_features = ['dct-adc', 'edge-adc/kirsch', 'edge-adc/laplacian',
                 'edge-adc/prewitt', 'edge-adc/scharr', 'edge-adc/sobel',
                 'gabor-adc', 'harlick-adc', 'ise-adc', 'lbp-adc', 'lbp-adc',
-                'phase-congruency-adc']#,
-#                'spatial-position-euclidean', 'spatial-dist-center',
-#                'spatial-dist-contour']
+                'phase-congruency-adc']
 # Define the extension of each features
 ext_features = ['_dct_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
                 '_edge_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
                 '_gabor_adc.npy', '_haralick_adc.npy', '_ise_adc.npy',
                 '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
-                '_phase_congruency_adc.npy']#, '_spe.npy', '_spe.npy',
-#                 '_spe.npy']
+                '_phase_congruency_adc.npy']
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided
@@ -41,8 +38,7 @@ path_store = '/data/prostate/balanced/mp-mri-prostate/exp-2'
 
 N_JOBS = -1
 # Create the under_samplers and over_samplers list to use
-samplers = [under_sampling.ClusterCentroids(n_jobs=N_JOBS),
-            under_sampling.InstanceHardnessThreshold(
+samplers = [under_sampling.InstanceHardnessThreshold(
                 n_jobs=N_JOBS, estimator='random-forest'),
             under_sampling.NearMiss(version=1, n_jobs=N_JOBS),
             under_sampling.NearMiss(version=2, n_jobs=N_JOBS),
@@ -54,7 +50,7 @@ samplers = [under_sampling.ClusterCentroids(n_jobs=N_JOBS),
             over_sampling.SMOTE(kind='borderline2', n_jobs=N_JOBS),
             over_sampling.RandomOverSampler()]
 # Define the sub-folder to use
-sub_folder = ['cc', 'iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
+sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
               'smote-b1', 'smote-b2', 'ros']
 
 # Generate the different path to be later treated

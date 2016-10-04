@@ -31,8 +31,7 @@ path_store = '/data/prostate/balanced/mp-mri-prostate/exp-2'
 
 N_JOBS = -1
 # Create the under_samplers and over_samplers list to use
-samplers = [under_sampling.ClusterCentroids(n_jobs=N_JOBS),
-            under_sampling.InstanceHardnessThreshold(
+samplers = [under_sampling.InstanceHardnessThreshold(
                 n_jobs=N_JOBS, estimator='random-forest'),
             under_sampling.NearMiss(version=1, n_jobs=N_JOBS),
             under_sampling.NearMiss(version=2, n_jobs=N_JOBS),
@@ -44,7 +43,7 @@ samplers = [under_sampling.ClusterCentroids(n_jobs=N_JOBS),
             over_sampling.SMOTE(kind='borderline2', n_jobs=N_JOBS),
             over_sampling.RandomOverSampler()]
 # Define the sub-folder to use
-sub_folder = ['cc', 'iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
+sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'adasyn', 'smote',
               'smote-b1', 'smote-b2', 'ros']
 
 # Generate the different path to be later treated

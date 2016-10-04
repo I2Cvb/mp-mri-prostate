@@ -41,8 +41,7 @@ path_store = '/data/prostate/balanced/mp-mri-prostate/exp-2'
 
 N_JOBS = -1
 # Create the under_samplers and over_samplers list to use
-samplers = [under_sampling.ClusterCentroids(n_jobs=N_JOBS),
-            under_sampling.InstanceHardnessThreshold(
+samplers = [under_sampling.InstanceHardnessThreshold(
                 n_jobs=N_JOBS, estimator='random-forest'),
             under_sampling.NearMiss(version=1, n_jobs=N_JOBS),
             under_sampling.NearMiss(version=2, n_jobs=N_JOBS),
