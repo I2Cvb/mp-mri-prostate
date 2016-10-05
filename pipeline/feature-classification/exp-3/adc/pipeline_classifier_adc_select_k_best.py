@@ -3,15 +3,15 @@ features."""
 from __future__ import division
 
 import os
-import mifs
 import numpy as np
 
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
+from sklearn.feature_selection import SelectPercentile
+from sklearn.feature_selection import f_classif
 from sklearn.ensemble import RandomForestClassifier
 
 from protoclass.data_management import GTModality
-
 
 # Define the path where the patients are stored
 path_patients = '/data/prostate/experiments'
@@ -106,40 +106,54 @@ for idx_pat in range(len(id_patient_list)):
     label.append(gt_cap[roi_prostate])
     print 'Data and label extracted for the current patient ...'
 
+percentiles = np.array([10, 12.5, 15, 17.5, 20, 22.5, 25])
 
+results_p = []
+for p in percentiles:
 
-feature_importance_cv = []
-# Go for LOPO cross-validation
-for idx_lopo_cv in range(len(id_patient_list)):
+    print 'Computing for percentile: {}'.format(p)
 
-    # Display some information about the LOPO-CV
-    print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
+    results_cv = []
+    # Go for LOPO cross-validation
+    for idx_lopo_cv in range(len(id_patient_list)):
 
-    # Get the testing data
-    testing_data = data[idx_lopo_cv]
-    testing_label = label_binarize(label[idx_lopo_cv], [0, 255])
-    print 'Create the testing set ...'
+        # Display some information about the LOPO-CV
+        print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
 
-    # Create the training data and label
-    # We need to take the balanced data
-    training_data = [arr for idx_arr, arr in enumerate(data_bal)
-                     if idx_arr != idx_lopo_cv]
-    training_label = [arr for idx_arr, arr in enumerate(label_bal)
-                     if idx_arr != idx_lopo_cv]
-    # Concatenate the data
-    training_data = np.vstack(training_data)
-    training_label = label_binarize(np.hstack(training_label).astype(int),
-                                    [0, 255])
-    print 'Create the training set ...'
+        # Get the testing data
+        testing_data = data[idx_lopo_cv]
+        testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
+        print 'Create the testing set ...'
 
-    # Make the feature selection with MRMR
-    MIFS = mifs.MutualInformationFeatureSelector(method='MRMR', verbose=2)
-    MIFS.fit(training_data, training_label)
-    feature_importance_cv.append(MIFS)
+        # Create the training data and label
+        # We need to take the balanced data
+        training_data = [arr for idx_arr, arr in enumerate(data_bal)
+                         if idx_arr != idx_lopo_cv]
+        training_label = [arr for idx_arr, arr in enumerate(label_bal)
+                         if idx_arr != idx_lopo_cv]
+        # Concatenate the data
+        training_data = np.vstack(training_data)
+        training_label = np.ravel(label_binarize(
+            np.hstack(training_label).astype(int), [0, 255]))
+        print 'Create the training set ...'
+
+        # Perform the classification for the current cv and the
+        # given configuration
+        # Feature selector
+        sel = SelectPercentile(f_classif, p)
+        training_data = sel.fit_transform(training_data, training_label)
+        testing_data = sel.transform(testing_data)
+        crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+        pred_prob = crf.fit(training_data, training_label).predict_proba(
+            testing_data)
+
+        results_cv.append([pred_prob, crf.classes_])
+
+    results_p.append(results_cv)
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-3/adc/mrmr'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-3/adc/k-best'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
-joblib.dump(feature_importance_cv, os.path.join(path_store,
-                                     'results.pkl'))
+joblib.dump(results_p, os.path.join(path_store,
+                                    'results.pkl'))
