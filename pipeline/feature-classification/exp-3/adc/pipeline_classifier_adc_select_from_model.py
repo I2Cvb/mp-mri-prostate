@@ -148,7 +148,7 @@ for p in percentiles:
         crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
         pred_prob = crf2.fit(training_data,
                              training_label).predict_proba(testing_data)
-        results_cv.append([pred_prob, crf.classes_])
+        results_cv.append([pred_prob, crf2.classes_])
 
     results_p.append(results_cv)
 
