@@ -87,11 +87,8 @@ for idx_pat in range(len(id_patient_list)):
            '_adc.npz')
     filename = os.path.join(path_balanced, pat_chg)
     npz_file = np.load(filename)
-    data_bal_meth.append(npz_file['data_resampled'])
-    label_bal_meth.append(npz_file['label_resampled'])
-
-    data_bal.append(data_bal_meth)
-    label_bal.append(label_bal_meth)
+    data_bal.append(npz_file['data_resampled'])
+    label_bal.append(npz_file['label_resampled'])
 
     print 'Balanced data loaded ...'
 
@@ -139,6 +136,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
 
     # Make the feature selection with MRMR
     MIFS = mifs.MutualInformationFeatureSelector(method='JMIM', verbose=2)
+    MIFS.fit(training_data, training_label)
     feature_importance_cv.append(MIFS)
 
 # Save the information
