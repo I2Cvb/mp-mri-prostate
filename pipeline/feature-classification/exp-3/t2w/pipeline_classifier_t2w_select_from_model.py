@@ -106,9 +106,37 @@ for idx_pat in range(len(id_patient_list)):
     print 'Data and label extracted for the current patient ...'
 
 
-
 percentiles = ['4*mean', '3.*mean', '2.5*mean', '2.*mean', '1.5*mean',
                '1.25*mean', 'mean']
+
+crf_cv = []
+# Go for LOPO cross-validation
+for idx_lopo_cv in range(len(id_patient_list)):
+
+    # Display some information about the LOPO-CV
+    print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
+
+    # Get the testing data
+    testing_data = data[idx_lopo_cv]
+    testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
+    print 'Create the testing set ...'
+
+    # Create the training data and label
+    # We need to take the balanced data
+    training_data = [arr for idx_arr, arr in enumerate(data_bal)
+                     if idx_arr != idx_lopo_cv]
+    training_label = [arr for idx_arr, arr in enumerate(label_bal)
+                     if idx_arr != idx_lopo_cv]
+    # Concatenate the data
+    training_data = np.vstack(training_data)
+    training_label = np.ravel(label_binarize(
+        np.hstack(training_label).astype(int), [0, 255]))
+    print 'Create the training set ...'
+
+    # Perform the classification for the current cv and the
+    # given configuration
+    crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+    crf_cv.append(crf.fit(training_data, training_label))
 
 results_p = []
 for p in percentiles:
@@ -141,8 +169,7 @@ for p in percentiles:
 
         # Perform the classification for the current cv and the
         # given configuration
-        crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-        sel = SelectFromModel(crf, threshold=p)
+        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=p, prefit=True)
         training_data = sel.fit_transform(training_data, training_label)
         testing_data = sel.transform(testing_data)
         crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
