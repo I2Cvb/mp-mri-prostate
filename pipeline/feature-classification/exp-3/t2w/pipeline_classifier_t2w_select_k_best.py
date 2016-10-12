@@ -32,7 +32,7 @@ ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
                 '_phase_congruency_t2w.npy']#, '_spe.npy', '_spe.npy',
 #                '_spe.npy']
 # Define the path of the balanced data
-path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2/iht'
+path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2/smote'
 ext_balanced = '_t2w.npz'
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
@@ -106,7 +106,7 @@ for idx_pat in range(len(id_patient_list)):
     label.append(gt_cap[roi_prostate])
     print 'Data and label extracted for the current patient ...'
 
-percentiles = np.array([10, 12.5, 15, 17.5, 20, 22.5, 25])
+percentiles = np.array([27.5, 30, 32.5, 35., 37.5, 40.])
 
 results_p = []
 for p in percentiles:
@@ -156,4 +156,4 @@ path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/k-best'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(results_p, os.path.join(path_store,
-                                    'results.pkl'))
+                                    'results_2.pkl'))

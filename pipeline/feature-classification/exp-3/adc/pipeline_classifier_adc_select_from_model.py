@@ -171,7 +171,7 @@ for p in percentiles:
         # given configuration
         # The random forest has been already fitted
         sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=p, prefit=True)
-        training_data = sel.fit_transform(training_data, training_label)
+        training_data = sel.transform(training_data)
         testing_data = sel.transform(testing_data)
         crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
         pred_prob = crf2.fit(training_data,

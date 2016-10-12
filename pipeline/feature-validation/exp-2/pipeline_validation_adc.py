@@ -10,7 +10,8 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 #sns.set(style='ticks', palette='Set2')
-current_palette = sns.color_palette("Set2", 10)
+current_palette = sns.color_palette("deep", 7)
+#current_palette = sns.color_palette()
 
 from scipy import interp
 
@@ -85,7 +86,12 @@ sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'smote',
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
+i_color = 0
 for idx_imb in range(len(sub_folder)):
+
+    if sub_folder[idx_imb] == 'ros' or sub_folder[idx_imb] == 'rus':
+        continue
+
     # # Initialise a list for the sensitivity and specificity
     # Initilise the mean roc
     mean_tpr = []
@@ -125,13 +131,14 @@ for idx_imb in range(len(sub_folder)):
     ax.fill_between(mean_fpr,
                     avg_tpr + std_tpr,
                     avg_tpr - std_tpr,
-                    alpha=0.2)
+                    facecolor=current_palette[i_color], alpha=0.2)
+    i_color += 1
 
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.0])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title(r'ADC classification with different balancing method')
+#plt.title(r'ADC classification with different balancing method')
 
 handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,

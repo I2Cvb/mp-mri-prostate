@@ -10,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 #sns.set(style='ticks', palette='Set2')
-current_palette = sns.color_palette("Set2", 10)
+current_palette = sns.color_palette("deep", 7)
 
 from scipy import interp
 
@@ -119,24 +119,24 @@ for idx_p, p in enumerate(percentiles):
     avg_tpr[-1] = 1.0
 
     ax.plot(mean_fpr, avg_tpr,
-            label=r'${} percentile - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+            label=r'${}$ percentile - AUC $= {:1.3f} \pm {:1.3f}$'.format(
                 p, auc(mean_fpr, avg_tpr), np.std(auc_pat)),
             lw=2)
     ax.fill_between(mean_fpr,
                     avg_tpr + std_tpr,
                     avg_tpr - std_tpr,
-                    alpha=0.2)
+                    facecolor=current_palette[idx_p], alpha=0.2)
 
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.0])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title(r'ADC classification using the a subset of features using ANOVA f-score')
+#plt.title(r'ADC classification using the a subset of features using ANOVA f-score')
 
 handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-3/adc_k_best.pdf',
+plt.savefig('results/exp-3/adc_anova.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')

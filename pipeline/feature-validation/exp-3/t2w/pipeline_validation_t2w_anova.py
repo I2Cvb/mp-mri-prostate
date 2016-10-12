@@ -75,11 +75,11 @@ for idx_lopo_cv in range(len(id_patient_list)):
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     testing_label_cv.append(testing_label)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/k-best/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/k-best/results_2.pkl'
 results = joblib.load(fresults)
 
 # Select the best n% in ANOVA test
-percentiles = np.array([10, 12.5, 15, 17.5, 20, 22.5, 25])
+percentiles = np.array([27.5, 30, 32.5, 35., 37.5, 40.])
 
 # Create an handle for the figure
 fig = plt.figure()
@@ -119,7 +119,7 @@ for idx_p, p in enumerate(percentiles):
     avg_tpr[-1] = 1.0
 
     ax.plot(mean_fpr, avg_tpr,
-            label=r'${} percentile - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+            label=r'${}$ percentile - AUC $= {:1.3f} \pm {:1.3f}$'.format(
                 p, auc(mean_fpr, avg_tpr), np.std(auc_pat)),
             lw=2)
     ax.fill_between(mean_fpr,
@@ -137,6 +137,6 @@ handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-3/t2w_k_best.pdf',
+plt.savefig('results/exp-3/t2w_k_best_2.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')

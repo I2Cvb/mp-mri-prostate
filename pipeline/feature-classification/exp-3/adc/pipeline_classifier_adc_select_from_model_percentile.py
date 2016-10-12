@@ -1,4 +1,4 @@
-"""This pipeline is intended to make the classification of T2W modality
+"""This pipeline is intended to make the classification of ADC modality
 features."""
 from __future__ import division
 
@@ -17,22 +17,22 @@ path_patients = '/data/prostate/experiments'
 # Define the path where the features have been extracted
 path_features = '/data/prostate/extraction/mp-mri-prostate'
 # Define a list of the path where the feature are kept
-t2w_features = ['dct-t2w', 'edge-t2w/kirsch', 'edge-t2w/laplacian',
-                'edge-t2w/prewitt', 'edge-t2w/scharr', 'edge-t2w/sobel',
-                'gabor-t2w', 'harlick-t2w', 'ise-t2w', 'lbp-t2w', 'lbp-t2w',
-                'phase-congruency-t2w']#,
+adc_features = ['dct-adc', 'edge-adc/kirsch', 'edge-adc/laplacian',
+                'edge-adc/prewitt', 'edge-adc/scharr', 'edge-adc/sobel',
+                'gabor-adc', 'harlick-adc', 'ise-adc', 'lbp-adc', 'lbp-adc',
+                'phase-congruency-adc']#,
 #                'spatial-position-euclidean', 'spatial-dist-center',
 #                'spatial-dist-contour']
 # Define the extension of each features
-ext_features = ['_dct_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
-                '_edge_t2w.npy', '_edge_t2w.npy', '_edge_t2w.npy',
-                '_gabor_t2w.npy', '_haralick_t2w.npy', '_ise_t2w.npy',
-                '_lbp_8_1_t2w.npy', '_lbp_16_2_t2w.npy',
-                '_phase_congruency_t2w.npy']#, '_spe.npy', '_spe.npy',
+ext_features = ['_dct_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
+                '_edge_adc.npy', '_edge_adc.npy', '_edge_adc.npy',
+                '_gabor_adc.npy', '_haralick_adc.npy', '_ise_adc.npy',
+                '_lbp_8_1_adc.npy', '_lbp_16_2_adc.npy',
+                '_phase_congruency_adc.npy']#, '_spe.npy', '_spe.npy',
 #                '_spe.npy']
 # Define the path of the balanced data
-path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2/smote'
-ext_balanced = '_t2w.npz'
+path_balanced = '/data/prostate/balanced/mp-mri-prostate/exp-2/iht'
+ext_balanced = '_adc.npz'
 # Define the path of the ground for the prostate
 path_gt = ['GT_inv/prostate', 'GT_inv/pz', 'GT_inv/cg', 'GT_inv/cap']
 # Define the label of the ground-truth which will be provided
@@ -62,11 +62,11 @@ for idx_pat in range(len(id_patient_list)):
 
     # For each patient we nee to load the different feature
     patient_data = []
-    for idx_feat in range(len(t2w_features)):
+    for idx_feat in range(len(adc_features)):
         # Create the path to the patient file
         filename_feature = (id_patient_list[idx_pat].lower().replace(' ', '_') +
                             ext_features[idx_feat])
-        path_data = os.path.join(path_features, t2w_features[idx_feat],
+        path_data = os.path.join(path_features, adc_features[idx_feat],
                                  filename_feature)
         single_feature_data = np.load(path_data)
         # Check if this is only one dimension data
@@ -81,7 +81,7 @@ for idx_pat in range(len(id_patient_list)):
 
     # Load the dataset from each balancing method
     pat_chg = (id_patient_list[idx_pat].lower().replace(' ', '_') +
-           '_t2w.npz')
+           '_adc.npz')
     filename = os.path.join(path_balanced, pat_chg)
     npz_file = np.load(filename)
     data_bal.append(npz_file['data_resampled'])
@@ -105,6 +105,7 @@ for idx_pat in range(len(id_patient_list)):
     label.append(gt_cap[roi_prostate])
     print 'Data and label extracted for the current patient ...'
 
+# Create all the necessary model only once
 crf_cv = []
 # Go for LOPO cross-validation
 for idx_lopo_cv in range(len(id_patient_list)):
@@ -137,11 +138,13 @@ for idx_lopo_cv in range(len(id_patient_list)):
 percentiles = [1., 2., 5., 10., 15., 20., 30., 40.]
 
 results_p = []
+feat_imp_p = []
 for p in percentiles:
 
     print 'Computing for percentile: {}'.format(p)
 
     results_cv = []
+    feat_imp_cv = []
     # Go for LOPO cross-validation
     for idx_lopo_cv in range(len(id_patient_list)):
 
@@ -165,9 +168,21 @@ for p in percentiles:
             np.hstack(training_label).astype(int), [0, 255]))
         print 'Create the training set ...'
 
+        # Compute the threshold that is needed
+        # Get the feature importance for this iteration
+        feat_imp = crf_cv[idx_lopo_cv].feature_importances_
+        # Sort the importance in decreasing order
+        feat_imp = np.sort(feat_imp)[::-1]
+        threshold = feat_imp[int(feat_imp.size * p / 100.)]
+        # Store which features have been selected
+        feat_imp_cv.append(np.flatnonzero(crf_cv[
+            idx_lopo_cv].feature_importances_ > threshold))
+
         # Perform the classification for the current cv and the
         # given configuration
-        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=p, prefit=True)
+        # The random forest has been already fitted
+        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=threshold,
+                              prefit=True)
         training_data = sel.transform(training_data)
         testing_data = sel.transform(testing_data)
         crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
@@ -176,10 +191,13 @@ for p in percentiles:
         results_cv.append([pred_prob, crf2.classes_])
 
     results_p.append(results_cv)
+    feat_imp_p.append(feat_imp_cv)
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/select-model'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-3/adc/select-model-percentile'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(results_p, os.path.join(path_store,
                                     'results.pkl'))
+joblib.dump(feat_imp_p, os.path.join(path_store,
+                                    'feat_sel.pkl'))

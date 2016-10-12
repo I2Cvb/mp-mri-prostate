@@ -1,5 +1,5 @@
 """
-This pipeline is used to report the results for the DCE modality.
+This pipeline is used to report the results for the ADC modality.
 """
 
 import os
@@ -10,7 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 #sns.set(style='ticks', palette='Set2')
-current_palette = sns.color_palette("deep", 7)
+current_palette = sns.color_palette("Set2", 10)
 
 from scipy import interp
 
@@ -75,22 +75,19 @@ for idx_lopo_cv in range(len(id_patient_list)):
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     testing_label_cv.append(testing_label)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-2/dce/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-3/adc/select-model-percentile/results.pkl'
 results = joblib.load(fresults)
 
-sub_folder = ['iht', 'nm1', 'nm2', 'nm3', 'rus', 'smote',
-              'smote-b1', 'smote-b2', 'ros']
+# Select the best n% in ANOVA test
+#percentiles = ['4*mean', '3.*mean', '2.5*mean', '2.*mean', '1.5*mean',
+#               '1.25*mean', 'mean']
+percentiles = [1., 2., 5., 10., 15., 20., 30., 40.]
 
 # Create an handle for the figure
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
-i_color = 0
-for idx_imb in range(len(sub_folder)):
-
-    if sub_folder[idx_imb] == 'ros' or sub_folder[idx_imb] == 'rus':
-        continue
-
+for idx_p, p in enumerate(percentiles):
     # # Initialise a list for the sensitivity and specificity
     # Initilise the mean roc
     mean_tpr = []
@@ -104,8 +101,8 @@ for idx_imb in range(len(sub_folder)):
         print 'Iteration #{} of the cross-validation'.format(idx_cv+1)
 
         # Get the prediction
-        pred_score = results[idx_imb][idx_cv][0]
-        classes = results[idx_imb][idx_cv][1]
+        pred_score = results[idx_p][idx_cv][0]
+        classes = results[idx_p][idx_cv][1]
         pos_class_arg = np.ravel(np.argwhere(classes == 1))[0]
 
         # Compute the fpr and tpr
@@ -124,25 +121,24 @@ for idx_imb in range(len(sub_folder)):
     avg_tpr[-1] = 1.0
 
     ax.plot(mean_fpr, avg_tpr,
-            label=r'{} balancing - AUC $= {:1.3f} \pm {:1.3f}$'.format(
-                sub_folder[idx_imb], auc(mean_fpr, avg_tpr), np.std(auc_pat)),
+            label=r'{} - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+                p, auc(mean_fpr, avg_tpr), np.std(auc_pat)),
             lw=2)
     ax.fill_between(mean_fpr,
                     avg_tpr + std_tpr,
                     avg_tpr - std_tpr,
-                    facecolor=current_palette[i_color], alpha=0.2)
-    i_color += 1
+                    alpha=0.2)
 
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.0])
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-#plt.title(r'DCE classification with different balancing method')
+plt.title(r'ADC classification using the a subset of features using feature significance')
 
 handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-2/dce.pdf',
+plt.savefig('results/exp-3/adc_model.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')

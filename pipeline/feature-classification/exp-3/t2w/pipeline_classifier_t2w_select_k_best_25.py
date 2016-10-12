@@ -7,8 +7,9 @@ import numpy as np
 
 from sklearn.externals import joblib
 from sklearn.preprocessing import label_binarize
+from sklearn.feature_selection import SelectPercentile
+from sklearn.feature_selection import f_classif
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import SelectFromModel
 
 from protoclass.data_management import GTModality
 
@@ -105,43 +106,13 @@ for idx_pat in range(len(id_patient_list)):
     label.append(gt_cap[roi_prostate])
     print 'Data and label extracted for the current patient ...'
 
-crf_cv = []
-# Go for LOPO cross-validation
-for idx_lopo_cv in range(len(id_patient_list)):
+percentiles = np.array([25.])
 
-    # Display some information about the LOPO-CV
-    print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
-
-    # Get the testing data
-    testing_data = data[idx_lopo_cv]
-    testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
-    print 'Create the testing set ...'
-
-    # Create the training data and label
-    # We need to take the balanced data
-    training_data = [arr for idx_arr, arr in enumerate(data_bal)
-                     if idx_arr != idx_lopo_cv]
-    training_label = [arr for idx_arr, arr in enumerate(label_bal)
-                     if idx_arr != idx_lopo_cv]
-    # Concatenate the data
-    training_data = np.vstack(training_data)
-    training_label = np.ravel(label_binarize(
-        np.hstack(training_label).astype(int), [0, 255]))
-    print 'Create the training set ...'
-
-    # Perform the classification for the current cv and the
-    # given configuration
-    crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_cv.append(crf.fit(training_data, training_label))
-
-percentiles = [1., 2., 5., 10., 15., 20., 30., 40.]
-
-results_p = []
 for p in percentiles:
 
     print 'Computing for percentile: {}'.format(p)
 
-    results_cv = []
+    feat_imp = []
     # Go for LOPO cross-validation
     for idx_lopo_cv in range(len(id_patient_list)):
 
@@ -167,19 +138,15 @@ for p in percentiles:
 
         # Perform the classification for the current cv and the
         # given configuration
-        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=p, prefit=True)
-        training_data = sel.transform(training_data)
-        testing_data = sel.transform(testing_data)
-        crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-        pred_prob = crf2.fit(training_data,
-                             training_label).predict_proba(testing_data)
-        results_cv.append([pred_prob, crf2.classes_])
+        # Feature selector
+        sel = SelectPercentile(f_classif, p)
+        training_data = sel.fit_transform(training_data, training_label)
 
-    results_p.append(results_cv)
+        feat_imp.append(sel.get_support(indices=True))
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/select-model'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/k-best'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
-joblib.dump(results_p, os.path.join(path_store,
-                                    'results.pkl'))
+joblib.dump(feat_imp, os.path.join(path_store,
+                                    'feat_imp.pkl'))

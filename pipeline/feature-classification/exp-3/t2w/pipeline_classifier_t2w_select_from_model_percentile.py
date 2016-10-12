@@ -137,11 +137,13 @@ for idx_lopo_cv in range(len(id_patient_list)):
 percentiles = [1., 2., 5., 10., 15., 20., 30., 40.]
 
 results_p = []
+feat_imp_p = []
 for p in percentiles:
 
     print 'Computing for percentile: {}'.format(p)
 
     results_cv = []
+    feat_imp_cv = []
     # Go for LOPO cross-validation
     for idx_lopo_cv in range(len(id_patient_list)):
 
@@ -165,9 +167,20 @@ for p in percentiles:
             np.hstack(training_label).astype(int), [0, 255]))
         print 'Create the training set ...'
 
+        # Compute the threshold that is needed
+        # Get the feature importance for this iteration
+        feat_imp = crf_cv[idx_lopo_cv].feature_importances_
+        # Sort the importance in decreasing order
+        feat_imp = np.sort(feat_imp)[::-1]
+        threshold = feat_imp[int(feat_imp.size * p / 100.)]
+        # Store which features have been selected
+        feat_imp_cv.append(np.flatnonzero(crf_cv[
+            idx_lopo_cv].feature_importances_ > threshold))
+
         # Perform the classification for the current cv and the
         # given configuration
-        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=p, prefit=True)
+        sel = SelectFromModel(crf_cv[idx_lopo_cv], threshold=threshold,
+                              prefit=True)
         training_data = sel.transform(training_data)
         testing_data = sel.transform(testing_data)
         crf2 = RandomForestClassifier(n_estimators=100, n_jobs=-1)
@@ -176,10 +189,13 @@ for p in percentiles:
         results_cv.append([pred_prob, crf2.classes_])
 
     results_p.append(results_cv)
+    feat_imp_p.append(feat_imp_cv)
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/select-model'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-3/t2w/select-model-percentile'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(results_p, os.path.join(path_store,
                                     'results.pkl'))
+joblib.dump(feat_imp_p, os.path.join(path_store,
+                                    'feat_sel.pkl'))
