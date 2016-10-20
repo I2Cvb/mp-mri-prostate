@@ -1,6 +1,8 @@
 Multi-parametric MRI for prostate cancer detection
 ==================================================
 
+This pipeline is related to the chapter 6 of the following [PhD thesis](https://github.com/glemaitre/phd_thesis/blob/master/thesis.pdf)
+
 How to use the pipeline?
 ------------------------
 
@@ -83,7 +85,12 @@ To normalize data, launch an `ipython` or `python` prompt and run from the root 
 
 The following extraction routines were applied:
 
-TODO
+- Intensity
+- Edge
+- Gabor
+- Phase congruency
+- Haralick
+- DCT
 
 #### Run the pipeline
 
@@ -125,4 +132,132 @@ To extract the different feature, launch an `ipython` or `python` prompt and run
 ```python
 >> run pipeline/feature-extraction/mrsi/pipeline_extraction_mrsi_signal.py
 >> run pipeline/feature-extraction/mrsi/pipeline_extraction_relative_quantification.py
+```
+
+### Performing the different experiment
+
+#### Experiment 1
+
+```python
+>> run pipeline/feature-classification/exp-1/pipeline_classifier_adc.py
+>> run pipeline/feature-classification/exp-1/pipeline_classifier_dce.py
+>> run pipeline/feature-classification/exp-1/pipeline_classifier_t2w.py
+>> run pipeline/feature-classification/exp-1/mrsi/pipeline_classifier_mrsi_citrate_choline_fit.py
+>> run pipeline/feature-classification/exp-1/mrsi/pipeline_classifier_mrsi_citrate_choline_fit_ratio.py
+>> run pipeline/feature-classification/exp-1/mrsi/pipeline_classifier_mrsi_citrate_choline_no_fit.py
+>> run pipeline/feature-classification/exp-1/mrsi/pipeline_classifier_mrsi_spectra.py
+```
+
+#### Experiment 2
+
+```python
+>> run pipeline/feature-classification/exp-2/pipeline_classifier_aggregation.py
+>> run pipeline/feature-classification/exp-2/pipeline_classifier_stacking_adaboost.py
+>> run pipeline/feature-classification/exp-2/pipeline_classifier_stacking_gradient_boosting.py
+```
+
+#### Experiment 3
+
+##### Balancing prior to classification
+
+The balancing is performed using:
+
+- SMOTE
+- SMOTE-b1
+- SMOTE-b2
+- NearMiss1
+- NearMiss2
+- NearMiss3
+- Instance Hardness Threshold
+
+First balancing should be performed as:
+
+```python
+>> run pipeline/feature-balancing/pipeline_balancing_adc.py
+>> run pipeline/feature-balancing/pipeline_balancing_dce.py
+>> run pipeline/feature-balancing/pipeline_balancing_t2w.py
+>> run pipeline/feature-balancing/pipeline_balancing_mrsi.py
+>> run pipeline/feature-balancing/pipeline_balancing_aggregation.py
+```
+
+Then, the classification is performed with:
+
+```python
+>> run pipeline/feature-classification/exp-3/balancing/pipeline_classifier_adc.py
+>> run pipeline/feature-classification/exp-3/balancing/pipeline_classifier_dce.py
+>> run pipeline/feature-classification/exp-3/balancing/pipeline_classifier_t2w.py
+>> run pipeline/feature-classification/exp-3/balancing/pipeline_classifier_mrsi.py
+>> run pipeline/feature-classification/exp-3/balancing/pipeline_classifier_aggregation.py
+```
+
+##### Selection/extraction with classification
+
+The feature selection and classification are performed jointly.
+
+Using ANOVA-based selection, run the following commands:
+
+```python
+>> run pipeline/feature-classification/exp-3/selection-extraction/anova/pipeline_classifier_adc.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/anova/pipeline_classifier_t2w.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/anova/pipeline_classifier_aggregation.py
+```
+
+Using Gini importance selection, run the following commands:
+
+```python
+>> run pipeline/feature-classification/exp-3/selection-extraction/rf/pipeline_classifier_adc.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/rf/pipeline_classifier_t2w.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/rf/pipeline_classifier_aggregation.py
+```
+
+The extraction is performed using:
+
+- PCA
+- Sparse-PCA
+- ICA
+
+Run the following commands:
+
+```python
+>> run pipeline/feature-classification/exp-3/selection-extraction/ica/pipeline_classifier_dce.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/ica/pipeline_classifier_mrsi.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/pca/pipeline_classifier_dce.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/pca/pipeline_classifier_mrsi.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/sparse-pca/pipeline_classifier_dce.py
+>> run pipeline/feature-classification/exp-3/selection-extraction/sparse-pca/pipeline_classifier_mrsi.py
+```
+
+#### Experiment 4
+
+To perform the fine-tuned classification, run the following commands:
+
+```python
+>> run pipeline/feature-classification/exp-4/pipeline_classifier_aggregation_modality.py
+>> run pipeline/feature-classification/exp-4/pipeline_classifier_stacking.py
+```
+
+#### Experiment 5
+
+To perform the fine-tuned classification without the MRSI data, run the following commands:
+
+```python
+>> run pipeline/feature-classification/exp-5/pipeline_classifier_stacking.py
+```
+
+### Plot
+
+A set of plot can be generated for the different experiments:
+
+```python
+>> run pipeline/feature-validation/exp-1/pipeline_validation_mrsi.py
+>> run pipeline/feature-validation/exp-1/pipeline_validation_t2w_adc.py
+>> run pipeline/feature-validation/exp-2/pipeline_validation_coarse_combination.py
+>> run pipeline/feature-validation/exp-3/balancing/pipeline_validation_adc.py
+>> run pipeline/feature-validation/exp-3/balancing/pipeline_validation_dce.py
+>> run pipeline/feature-validation/exp-3/balancing/pipeline_validation_mrsi.py
+>> run pipeline/feature-validation/exp-3/balancing/pipeline_validation_t2w.py
+>> run pipeline/feature-validation/exp-3/balancing/pipeline_validation_aggregation.py
+>> run pipeline/feature-validation/exp-4/pipeline_validation_combine.py
+>> run pipeline/feature-validation/exp-4/pipeline_validation_patients.py
+>> run pipeline/feature-validation/exp-5/pipeline_validation_stacking_wt_mrsi.py
 ```
