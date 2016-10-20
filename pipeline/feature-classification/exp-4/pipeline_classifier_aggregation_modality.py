@@ -13,7 +13,6 @@ from sklearn.feature_selection import f_classif
 from sklearn.decomposition import FastICA
 
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import GradientBoostingClassifier
 
 from protoclass.data_management import GTModality
 
@@ -213,158 +212,93 @@ for idx_lopo_cv in range(len(id_patient_list)):
     # Display some information about the LOPO-CV
     print 'Round #{} of the LOPO-CV'.format(idx_lopo_cv + 1)
 
-    # We will need a training and a validation set for the meta-classifier
-    # Create a vector with all the patients
-    idx_patient = range(len(id_patient_list))
-    idx_patient.remove(idx_lopo_cv)
-    idx_patient = np.roll(idx_patient, idx_lopo_cv)
-    # We will use the 60 percent as training and 40 percent as validation
-    idx_split = int(0.6 * (len(id_patient_list) - 1))
-    idx_patient_training = idx_patient[:idx_split]
-    idx_patient_validation = idx_patient[idx_split:]
-
     # Load already the testing and training label
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     training_label = [arr for idx_arr, arr in enumerate(label)
-                      if idx_arr in idx_patient_training]
+                      if idx_arr != idx_lopo_cv]
     training_label = np.ravel(label_binarize(
         np.hstack(training_label).astype(int), [0, 255]))
-    validation_label = [arr for idx_arr, arr in enumerate(label)
-                        if idx_arr in idx_patient_validation]
-    validation_label = np.ravel(label_binarize(
-        np.hstack(validation_label).astype(int), [0, 255]))
 
 
     # Load the data for each modality by selecting the featur of interest
     # T2W
     # Load data
     t2w_training_data = [arr for idx_arr, arr in enumerate(data[0])
-                         if idx_arr in idx_patient_training]
-    t2w_validation_data = [arr for idx_arr, arr in enumerate(data[0])
-                         if idx_arr in idx_patient_validation]
+                         if idx_arr != idx_lopo_cv]
     t2w_testing_data = data[0][idx_lopo_cv]
     # Convert the list to array
     t2w_training_data = np.concatenate(t2w_training_data, axis=0)
-    t2w_validation_data = np.concatenate(t2w_validation_data, axis=0)
     t2w_testing_data = np.array(t2w_testing_data)
     # Select subset
     t2w_training_data = t2w_training_data[:, t2w_feat_sel_idx]
-    t2w_validation_data = t2w_validation_data[:, t2w_feat_sel_idx]
     t2w_testing_data = t2w_testing_data[:, t2w_feat_sel_idx]
-
-    # Train an rf
-    crf_t2w = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_t2w.fit(t2w_training_data, training_label)
 
     # ADC
     # Load data
     adc_training_data = [arr for idx_arr, arr in enumerate(data[1])
-                         if idx_arr in idx_patient_training]
-    adc_validation_data = [arr for idx_arr, arr in enumerate(data[1])
-                         if idx_arr in idx_patient_validation]
+                         if idx_arr != idx_lopo_cv]
     adc_testing_data = data[1][idx_lopo_cv]
     # Convert the list to array
     adc_training_data = np.concatenate(adc_training_data, axis=0)
-    adc_validation_data = np.concatenate(adc_validation_data, axis=0)
     adc_testing_data = np.array(adc_testing_data)
     # Select the subset
     adc_training_data = adc_training_data[:, adc_feat_sel_idx]
-    adc_validation_data = adc_validation_data[:, adc_feat_sel_idx]
     adc_testing_data = adc_testing_data[:, adc_feat_sel_idx]
-
-    # Train an rf
-    crf_adc = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_adc.fit(adc_training_data, training_label)
 
     # MRSI
     mrsi_training_data = [arr for idx_arr, arr in enumerate(data[2])
-                         if idx_arr in idx_patient_training]
-    mrsi_validation_data = [arr for idx_arr, arr in enumerate(data[2])
-                         if idx_arr in idx_patient_validation]
-
+                         if idx_arr != idx_lopo_cv]
     mrsi_testing_data = data[2][idx_lopo_cv]
     # Convert the list to array
     mrsi_training_data = np.concatenate(mrsi_training_data, axis=0)
-    mrsi_validation_data = np.concatenate(mrsi_validation_data, axis=0)
     mrsi_testing_data = np.array(mrsi_testing_data)
-
-    # Train an rf
-    crf_mrsi = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_mrsi.fit(mrsi_training_data, training_label)
 
     # DCE
     # Load data
     dce_training_data = [arr for idx_arr, arr in enumerate(data[3])
-                         if idx_arr in idx_patient_training]
-    dce_validation_data = [arr for idx_arr, arr in enumerate(data[3])
-                         if idx_arr in idx_patient_validation]
-
+                         if idx_arr != idx_lopo_cv]
     dce_testing_data = data[3][idx_lopo_cv]
     # Convert the list to array
     dce_training_data = np.concatenate(dce_training_data, axis=0)
-    dce_validation_data = np.concatenate(dce_validation_data, axis=0)
     dce_testing_data = np.array(dce_testing_data)
     # Select the data
     # Learn the PCA projection
     ica = FastICA(n_components=24, whiten=True)
     dce_training_data = ica.fit_transform(dce_training_data)
-    dce_validation_data = ica.transform(dce_validation_data)
     dce_testing_data = ica.transform(dce_testing_data)
 
-    # Train an rf
-    crf_dce = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_dce.fit(dce_training_data, training_label)
+    # Spatial information
+    # Load data
+    spa_training_data = [arr for idx_arr, arr in enumerate(data[4])
+                         if idx_arr != idx_lopo_cv]
+    spa_testing_data = data[4][idx_lopo_cv]
+    # Convert the list to array
+    spa_training_data = np.concatenate(spa_training_data, axis=0)
+    spa_testing_data = np.array(spa_testing_data)
 
-    rf_data_answer = []
-    # Test each array with the validation set and use it train the next
-    # classifier
-    pred_proba = crf_t2w.predict_proba(t2w_validation_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_t2w.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_adc.predict_proba(adc_validation_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_adc.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_mrsi.predict_proba(mrsi_validation_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_dce.predict_proba(dce_validation_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_dce.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
+    # Stack all the training data and testing data
+    training_data = np.hstack((t2w_training_data,
+                               adc_training_data,
+                               mrsi_training_data,
+                               dce_training_data,
+                               spa_training_data))
+    testing_data = np.hstack((t2w_testing_data,
+                               adc_testing_data,
+                               mrsi_testing_data,
+                               dce_testing_data,
+                               spa_testing_data))
 
-    # For know we will train a classifier using the previous probability
-    # extracted
-    rf_data_answer = np.vstack(rf_data_answer).T
+    # Perform the classification for the current cv and the
+    # given configuration
+    crf = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+    pred_prob = crf.fit(training_data,
+                        np.ravel(training_label)).predict_proba(
+                            testing_data)
 
-    # Create the meta-classifier
-    cgb = GradientBoostingClassifier()
-    cgb.fit(rf_data_answer, validation_label)
-
-    # Make the testing
-    rf_data_answer = []
-    # Test each array with the validation set and use it train the next
-    # classifier
-    pred_proba = crf_t2w.predict_proba(t2w_testing_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_t2w.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_adc.predict_proba(adc_testing_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_adc.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_mrsi.predict_proba(mrsi_testing_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_dce.predict_proba(dce_testing_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_dce.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
-
-    # For know we will train a classifier using the previous probability
-    # extracted
-    rf_data_answer = np.vstack(rf_data_answer).T
-
-    pred_prob = cgb.predict_proba(rf_data_answer)
-    result_cv.append([pred_prob, cgb.classes_])
+    result_cv.append([pred_prob, crf.classes_])
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-4/stacking'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-4/aggregation-modality'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(result_cv, os.path.join(path_store,

@@ -276,21 +276,21 @@ for idx_lopo_cv in range(len(id_patient_list)):
     crf_adc = RandomForestClassifier(n_estimators=100, n_jobs=-1)
     crf_adc.fit(adc_training_data, training_label)
 
-    # MRSI
-    mrsi_training_data = [arr for idx_arr, arr in enumerate(data[2])
-                         if idx_arr in idx_patient_training]
-    mrsi_validation_data = [arr for idx_arr, arr in enumerate(data[2])
-                         if idx_arr in idx_patient_validation]
+    # # MRSI
+    # mrsi_training_data = [arr for idx_arr, arr in enumerate(data[2])
+    #                      if idx_arr in idx_patient_training]
+    # mrsi_validation_data = [arr for idx_arr, arr in enumerate(data[2])
+    #                      if idx_arr in idx_patient_validation]
 
-    mrsi_testing_data = data[2][idx_lopo_cv]
-    # Convert the list to array
-    mrsi_training_data = np.concatenate(mrsi_training_data, axis=0)
-    mrsi_validation_data = np.concatenate(mrsi_validation_data, axis=0)
-    mrsi_testing_data = np.array(mrsi_testing_data)
+    # mrsi_testing_data = data[2][idx_lopo_cv]
+    # # Convert the list to array
+    # mrsi_training_data = np.concatenate(mrsi_training_data, axis=0)
+    # mrsi_validation_data = np.concatenate(mrsi_validation_data, axis=0)
+    # mrsi_testing_data = np.array(mrsi_testing_data)
 
-    # Train an rf
-    crf_mrsi = RandomForestClassifier(n_estimators=100, n_jobs=-1)
-    crf_mrsi.fit(mrsi_training_data, training_label)
+    # # Train an rf
+    # crf_mrsi = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+    # crf_mrsi.fit(mrsi_training_data, training_label)
 
     # DCE
     # Load data
@@ -324,9 +324,9 @@ for idx_lopo_cv in range(len(id_patient_list)):
     pred_proba = crf_adc.predict_proba(adc_validation_data)
     pos_class_arg = np.ravel(np.argwhere(crf_adc.classes_ == 1))[0]
     rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_mrsi.predict_proba(mrsi_validation_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
+    # pred_proba = crf_mrsi.predict_proba(mrsi_validation_data)
+    # pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
+    # rf_data_answer.append(pred_proba[:, pos_class_arg])
     pred_proba = crf_dce.predict_proba(dce_validation_data)
     pos_class_arg = np.ravel(np.argwhere(crf_dce.classes_ == 1))[0]
     rf_data_answer.append(pred_proba[:, pos_class_arg])
@@ -349,9 +349,9 @@ for idx_lopo_cv in range(len(id_patient_list)):
     pred_proba = crf_adc.predict_proba(adc_testing_data)
     pos_class_arg = np.ravel(np.argwhere(crf_adc.classes_ == 1))[0]
     rf_data_answer.append(pred_proba[:, pos_class_arg])
-    pred_proba = crf_mrsi.predict_proba(mrsi_testing_data)
-    pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
-    rf_data_answer.append(pred_proba[:, pos_class_arg])
+    # pred_proba = crf_mrsi.predict_proba(mrsi_testing_data)
+    # pos_class_arg = np.ravel(np.argwhere(crf_mrsi.classes_ == 1))[0]
+    # rf_data_answer.append(pred_proba[:, pos_class_arg])
     pred_proba = crf_dce.predict_proba(dce_testing_data)
     pos_class_arg = np.ravel(np.argwhere(crf_dce.classes_ == 1))[0]
     rf_data_answer.append(pred_proba[:, pos_class_arg])
@@ -364,7 +364,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     result_cv.append([pred_prob, cgb.classes_])
 
 # Save the information
-path_store = '/data/prostate/results/mp-mri-prostate/exp-4/stacking'
+path_store = '/data/prostate/results/mp-mri-prostate/exp-5/stacking'
 if not os.path.exists(path_store):
     os.makedirs(path_store)
 joblib.dump(result_cv, os.path.join(path_store,

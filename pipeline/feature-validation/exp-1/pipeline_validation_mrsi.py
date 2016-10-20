@@ -1,5 +1,5 @@
 """
-This pipeline is used to report the results for the ALL modality.
+This pipeline is used to report the results for the MRSI modality.
 """
 
 import os
@@ -9,7 +9,6 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-#sns.set(style='ticks', palette='Set2')
 current_palette = sns.color_palette()
 
 from scipy import interp
@@ -75,7 +74,7 @@ for idx_lopo_cv in range(len(id_patient_list)):
     testing_label = np.ravel(label_binarize(label[idx_lopo_cv], [0, 255]))
     testing_label_cv.append(testing_label)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-4/aggregation-modality/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-citrate-choline-fit-ratio/results.pkl'
 results = joblib.load(fresults)
 
 # # Initialise a list for the sensitivity and specificity
@@ -115,7 +114,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 ax.plot(mean_fpr, avg_tpr,
-        label=r'RF fine-tuned per modality - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+        label=r'MRSI ratio Cit/Cho - AUC $= {:1.3f} \pm {:1.3f}$'.format(
             auc(mean_fpr, avg_tpr), np.std(auc_pat)),
         lw=2)
 ax.fill_between(mean_fpr,
@@ -123,7 +122,7 @@ ax.fill_between(mean_fpr,
                 avg_tpr - std_tpr,
                 facecolor=current_palette[0], alpha=0.2)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-4/stacking/results.pkl'
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-citrate-choline-fit/results.pkl'
 results = joblib.load(fresults)
 
 # # Initialise a list for the sensitivity and specificity
@@ -159,7 +158,7 @@ std_tpr = np.std(mean_tpr, axis=0)
 avg_tpr[-1] = 1.0
 
 ax.plot(mean_fpr, avg_tpr,
-        label=r'Stacking fine-tuned per modality - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+        label=r'MRSI Cit/Cho fit - AUC $= {:1.3f} \pm {:1.3f}$'.format(
             auc(mean_fpr, avg_tpr), np.std(auc_pat)),
         lw=2)
 ax.fill_between(mean_fpr,
@@ -167,7 +166,8 @@ ax.fill_between(mean_fpr,
                 avg_tpr - std_tpr,
                 facecolor=current_palette[1], alpha=0.2)
 
-fresults = '/data/prostate/results/mp-mri-prostate/exp-3/selection-extraction/rf/aggregation/results.pkl'
+
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-citrate-choline-no-fit/results.pkl'
 results = joblib.load(fresults)
 
 # # Initialise a list for the sensitivity and specificity
@@ -183,8 +183,8 @@ for idx_cv in range(len(testing_label_cv)):
     print 'Iteration #{} of the cross-validation'.format(idx_cv+1)
 
     # Get the prediction
-    pred_score = results[3][idx_cv][0]
-    classes = results[3][idx_cv][1]
+    pred_score = results[idx_cv][0]
+    classes = results[idx_cv][1]
     pos_class_arg = np.ravel(np.argwhere(classes == 1))[0]
 
     # Compute the fpr and tpr
@@ -203,7 +203,7 @@ std_tpr = np.std(mean_tpr, axis=0)
 avg_tpr[-1] = 1.0
 
 ax.plot(mean_fpr, avg_tpr,
-        label=r'RF fine-tuned aggregation - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+        label=r'MRSI ratio Cit/Cho - AUC $= {:1.3f} \pm {:1.3f}$'.format(
             auc(mean_fpr, avg_tpr), np.std(auc_pat)),
         lw=2)
 ax.fill_between(mean_fpr,
@@ -211,6 +211,49 @@ ax.fill_between(mean_fpr,
                 avg_tpr - std_tpr,
                 facecolor=current_palette[2], alpha=0.2)
 
+fresults = '/data/prostate/results/mp-mri-prostate/exp-1/mrsi-spectra/results.pkl'
+results = joblib.load(fresults)
+
+# # Initialise a list for the sensitivity and specificity
+# Initilise the mean roc
+mean_tpr = []
+mean_fpr = np.linspace(0, 1, 30)
+auc_pat = []
+
+# Go for each cross-validation iteration
+for idx_cv in range(len(testing_label_cv)):
+
+    # Print the information about the iteration in the cross-validation
+    print 'Iteration #{} of the cross-validation'.format(idx_cv+1)
+
+    # Get the prediction
+    pred_score = results[idx_cv][0]
+    classes = results[idx_cv][1]
+    pos_class_arg = np.ravel(np.argwhere(classes == 1))[0]
+
+    # Compute the fpr and tpr
+    fpr, tpr, thresh = roc_curve(testing_label_cv[idx_cv],
+                                 pred_score[:, pos_class_arg])
+
+    # Compute the mean ROC
+    mean_tpr.append(interp(mean_fpr,
+                           fpr,
+                           tpr))
+    mean_tpr[idx_cv][0] = 0.0
+    auc_pat.append(auc(mean_fpr, mean_tpr[-1]))
+
+avg_tpr = np.mean(mean_tpr, axis=0)
+std_tpr = np.std(mean_tpr, axis=0)
+avg_tpr[-1] = 1.0
+
+ax.plot(mean_fpr, avg_tpr,
+        label=r'MRSI spectra - AUC $= {:1.3f} \pm {:1.3f}$'.format(
+            auc(mean_fpr, avg_tpr), np.std(auc_pat)),
+        lw=2)
+ax.fill_between(mean_fpr,
+                avg_tpr + std_tpr,
+                avg_tpr - std_tpr,
+                facecolor=current_palette[3], alpha=0.2)
 
 
 plt.xlim([0.0, 1.0])
@@ -223,6 +266,6 @@ handles, labels = ax.get_legend_handles_labels()
 lgd = ax.legend(handles, labels, loc='lower right')#,
                 #bbox_to_anchor=(1.4, 0.1))
 # Save the plot
-plt.savefig('results/exp-4/fine_tuned.pdf',
+plt.savefig('results/exp-1/mrsi_all.pdf',
             bbox_extra_artists=(lgd,),
             bbox_inches='tight')
